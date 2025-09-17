@@ -1,0 +1,8 @@
+[console_scripts]
+ragas = ragas.cli:app
+
+[ragas.backends]
+gdrive = ragas.backends.gdrive_backend:GDriveBackend
+inmemory = ragas.backends.inmemory:InMemoryBackend
+local/csv = ragas.backends.local_csv:LocalCSVBackend
+local/jsonl = ragas.backends.local_jsonl:LocalJSONLBackend
