@@ -8,4 +8,4 @@ response = client.responses.create(
   store=True,
 )
 
-print(response);
+print('response:', response);
