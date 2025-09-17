@@ -1,0 +1,15 @@
+ragas==0.3.4
+pandas==2.3.2
+python-dotenv==1.1.1
+tqdm==4.67.1
+rich==14.1.0
+
+# OpenAI SDK (Responses API)
+openai==1.107.3
+
+# обёртки для RAGAS (LLM/эмбеддинги через LangChain)
+langchain-openai==0.3.33
+
+# Работа с датасетами
+datasets==4.0.0
+pyarrow==17.0.0
