@@ -111,7 +111,7 @@ SAMPLES: List[Sample] = [
     ),
     Sample(
         question="Какова столица Франции?",
-        ground_truth="Париж.",
+        ground_truth="Москва.",
         contexts=[], # QA-режим (без контекста)
     ),
 ]
