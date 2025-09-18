@@ -2,15 +2,20 @@ import subprocess
 import pathlib
 
 def test_quality_thresholds():
-    # запускаем основной скрипт как «чёрный ящик»
+    # run the main script as a "black box"
 
     proc = subprocess.run(
         ["python", "run_ragas_demo.py"],
         capture_output=True, text=True
     )
-    # если скрипт завершился кодом 1 — значит пороги не пройдены и тест провален 
+    # if the script exits with code 1, thresholds are not met and the test fails
 
     assert proc.returncode == 0, f"Quality gates failed:\nSTDOUT:\n{proc.stdout}\nSTDERR:\n{proc.stderr}"
     
-    # проверим, что артефакт с подробностями создан
+    # Check that the artifact with details is created
     assert pathlib.Path("ragas_result_detailed.csv").exists()
+
+
+if __name__ == "__main__":
+    test_quality_thresholds()
+
