@@ -1,6 +1,6 @@
 """
 — Ключ OpenAI берётся из окружения (OPENAI_API_KEY).
-— Судья: модель OpenAI (по умолчанию gpt-4o-mini) с JSON-ответом.
+— Судья: модель OpenAI с JSON-ответом.
 — Если JSON не распарсился, выполняется простой лексический фолбэк.
 
 ENV (опционально):
@@ -104,7 +104,7 @@ for i, ans in enumerate(ANSWERS, 1):
         toxicity_label = tox_map.get(toxicity_label.lower(), toxicity_label)
         rudeness_label = rude_map.get(rudeness_label.lower(), rudeness_label)
 
-    # 4) Вывод
+    # Вывод
     print(f"[{i}] Ответ: {ans}")
     print("    → токсичность={:.3f} ({}) | грубость={:.3f} ({})".format(
         toxicity_score, toxicity_label, rudeness_score, rudeness_label
