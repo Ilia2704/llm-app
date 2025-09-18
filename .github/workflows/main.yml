@@ -2,8 +2,8 @@ name: PR Quality Checks
 
 on:
   pull_request:
-    branches: ["**"]   # запускается на любой PR
-  workflow_dispatch:    # возможность запустить вручную
+    branches: ["**"]   
+  workflow_dispatch:    
 
 jobs:
   tests:
@@ -34,15 +34,12 @@ jobs:
             pip install -U openai ragas datasets langchain-openai python-dotenv tqdm pandas
           fi
 
-      # 1) RAGAS тест (твой файл run_ragas_demo_test.py).
-      #    Скрипт должен завершаться кодом 1 при провале гейтов (assert/exit).
       - name: Run RAGAS test
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: gpt-4o-mini
           RAGAS_EMBEDDING_MODEL: text-embedding-3-small
           USE_SIMPLE_AR: "1"
-          # при необходимости можешь переопределять пороги:
           THRESH_FAITHFULNESS: "0.80"
           THRESH_ANSWER_RELEVANCY: "0.70"
           THRESH_CONTEXT_PRECISION: "0.60"
@@ -50,8 +47,6 @@ jobs:
         run: |
           python run_ragas_demo_test.py
 
-      # 2) Тест токсичности/грубости (твой файл toxic_test.py).
-      #    Если скрипт сам не делает exit 1 при фейле — парсим stdout.
       - name: Run toxicity test
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

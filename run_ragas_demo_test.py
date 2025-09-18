@@ -171,9 +171,8 @@ def cosine(u: List[float], v: List[float]) -> float:
 
 def embed_texts(texts: List[str], *, model: str, client: OpenAI) -> List[List[float]]:
     """Эмбеддинги напрямую через OpenAI Embeddings API"""
-    # Можно батчевать при больших объёмах; тут мало — одним вызовом.
-    res = client.embeddings.create(model=model, input=texts)
-    # В SDK 1.x порядок соответствует входу
+    res = client.embeddings.create(model=model, 
+                                   input=texts)
     return [d.embedding for d in res.data]
 
 def compute_simple_answer_relevancy_from_df(df_texts: pd.DataFrame, *, model: str, client: OpenAI) -> List[float]:
@@ -195,7 +194,7 @@ def compute_answer_gt_similarity(df_texts: pd.DataFrame, *, model: str, client: 
 
 # Основной сценарий тестирования
 def main() -> None:
-    # Шаг 1. Генерация ответов
+    # Генерация ответов
     rows: List[Dict[str, Any]] = []
     print("\n[1/3] Генерация ответов моделью...")
     log.info("Начало генерации: %d кейсов, модель=%s", len(SAMPLES), OPENAI_MODEL)
@@ -227,7 +226,7 @@ def main() -> None:
             bad.append((i, "contexts"))
 
 
-      # Шаг 2. Оценка: RAGAS для кейсов с контекстом + универсальные QA-метрики
+      # Оценка: RAGAS для кейсов с контекстом + универсальные QA-метрики
     print("\n[2/3] Оценка метрик...")
     evaluator_llm = LangchainLLMWrapper(
         ChatOpenAI(model=OPENAI_MODEL, temperature=0, api_key=OPENAI_API_KEY)
@@ -275,15 +274,15 @@ def main() -> None:
             print("\n[FAIL] RAGAS evaluate() завершился ошибкой:", type(e).__name__, str(e))
             sys.exit(1)
 
-    # 2.2 AnswerRelevancy (fallback Q↔A) для всех строк
+    #  AnswerRelevancy (fallback Q↔A) для всех строк
     ar_scores = compute_simple_answer_relevancy_from_df(df, model=RAGAS_EMBEDDING_MODEL, client=client)
     details_all["answer_relevancy"] = ar_scores
 
-    # 2.3 Семантическая корректность (A↔GT) для всех строк
+    # Семантическая корректность (A↔GT) для всех строк
     qa_sim = compute_answer_gt_similarity(df, model=RAGAS_EMBEDDING_MODEL, client=client)
     details_all["qa_semantic_correctness"] = qa_sim
 
-    # Шаг 3. Сводка и quality-gates
+    # Сводка и quality-gates
     print("\n[3/3] Итоги (средние значения метрик):")
 
     wanted = [
@@ -291,7 +290,7 @@ def main() -> None:
         "answer_relevancy",
         "context_precision",
         "context_recall",
-        "qa_semantic_correctness",   # новая метрика
+        "qa_semantic_correctness",   
     ]
     present = [c for c in wanted if c in details_all.columns]
     summary: Dict[str, float] = {c: float(details_all[c].mean(skipna=True)) for c in present}
@@ -313,7 +312,7 @@ def main() -> None:
         "answer_relevancy": env_float("THRESH_ANSWER_RELEVANCY", 0.70),
         "context_precision": env_float("THRESH_CONTEXT_PRECISION", 0.60),
         "context_recall": env_float("THRESH_CONTEXT_RECALL", 0.70),
-        "qa_semantic_correctness": env_float("THRESH_QA_SIM", 0.80),  # дефолт для QA
+        "qa_semantic_correctness": env_float("THRESH_QA_SIM", 0.80),  
     }
 
     # Подробный отчёт по кейсам
@@ -339,7 +338,6 @@ def main() -> None:
         print(f"\n[{i+1}] Q: {r['question']}")
         print(f"     A: {r['answer']}")
         print(f"    GT: {r['ground_truth']}")
-        # Печатаем только те метрики, которые реально посчитались
         parts = []
         for m in ["faithfulness", "answer_relevancy", "context_precision", "context_recall", "qa_semantic_correctness"]:
             if m in report.columns:
@@ -350,7 +348,7 @@ def main() -> None:
     failed = []
     for k, th in thresholds.items():
         if k not in present:
-            continue  # не проверяем метрики, которых нет
+            continue  
         v = summary.get(k, None)
         if v is None or (v != v) or v < th:
             failed.append(k)
