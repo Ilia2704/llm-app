@@ -69,7 +69,7 @@ DOCS = {
     "returns":  "Возврат: в течение 30 дней для всех товаров; электроника — 15 дней.",
     "warranty": "Гарантия: 1 год на все товары; на батареи — 6 месяцев.",
     "stores":   "Магазины: Москва и Санкт-Петербург. Самовывоз доступен.",
-    "noise":    "История бренда: мы любим футбол и мате. Этот текст не содержит правил доставки."
+    "noise":    "История бренда: мы любим футбол и пиво. Этот текст не содержит правил доставки."
 }
 
 @dataclass
@@ -236,7 +236,7 @@ def main() -> None:
     rag_mask = df["contexts"].apply(lambda xs: isinstance(xs, list) and len(xs) > 0)
     details_all = pd.DataFrame(index=df.index)
 
-    # 2.1 RAGAS (только там, где есть контекст)
+    #  RAGAS (только там, где есть контекст)
     if rag_mask.any():
         hf_ds = Dataset.from_pandas(df.loc[rag_mask, ["question", "answer", "contexts", "ground_truth"]])
         metrics = [Faithfulness(), ContextPrecision(), ContextRecall()]
