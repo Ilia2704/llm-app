@@ -16,10 +16,8 @@ ENV:
 import os
 import sys
 import logging
-import traceback
 from dataclasses import dataclass
 from typing import List, Dict, Any
-from datetime import datetime, timezone
 
 from dotenv import load_dotenv
 from tqdm import tqdm
@@ -82,7 +80,7 @@ class Sample:
 
 SAMPLES: List[Sample] = [
     Sample(
-        question="Сколько стоит доставка по Бразилии и когда отправляете?",
+        question="Сколько стоит доставка по России и когда отправляете?",
         ground_truth="Бесплатно от 1000 RUB. Отправляем в тот же рабочий день.",
         contexts=[DOCS["shipping"]],
     ),
@@ -103,7 +101,7 @@ SAMPLES: List[Sample] = [
     ),
     Sample(
         question="Есть ли магазин в Новороссийске?",
-        ground_truth="В предоставленном контексте нет информации о магазине в Рио.",
+        ground_truth="В предоставленном контексте нет информации о магазине в Новороссийске.",
         contexts=[DOCS["stores"]],
     ),
     Sample(
@@ -317,6 +315,37 @@ def main() -> None:
         "context_recall": env_float("THRESH_CONTEXT_RECALL", 0.70),
         "qa_semantic_correctness": env_float("THRESH_QA_SIM", 0.80),  # дефолт для QA
     }
+
+    # Подробный отчёт по кейсам
+    metrics_df = None
+    if "details_all" in locals():
+        metrics_df = details_all.copy()
+    else:
+        metrics_df = pd.DataFrame(index=df.index)
+
+    report = df.join(metrics_df, how="left")
+
+    def _fmt(x):
+        try:
+            import math
+            if x is None or (isinstance(x, float) and (math.isnan(x))):
+                return "N/A"
+            return f"{float(x):.4f}"
+        except Exception:
+            return "N/A"
+
+    print("\n=== Подробный отчёт по кейсам ===")
+    for i, r in report.iterrows():
+        print(f"\n[{i+1}] Q: {r['question']}")
+        print(f"     A: {r['answer']}")
+        print(f"    GT: {r['ground_truth']}")
+        # Печатаем только те метрики, которые реально посчитались
+        parts = []
+        for m in ["faithfulness", "answer_relevancy", "context_precision", "context_recall", "qa_semantic_correctness"]:
+            if m in report.columns:
+                parts.append(f"{m}={_fmt(r.get(m))}")
+        print("Scores: " + (", ".join(parts) if parts else "нет доступных метрик"))
+
 
     failed = []
     for k, th in thresholds.items():
