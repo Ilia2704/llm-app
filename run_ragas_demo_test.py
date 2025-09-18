@@ -134,6 +134,7 @@ def extract_output_text(resp) -> str:
     
     return str(resp)
 
+# Генерация ответа
 def llm_answer(question: str, contexts: List[str]) -> str:
     """Генерация ответа через OpenAI Responses API (температура=0).
     Если contexts пуст — модель отвечает из своих знаний (QA-режим)."""
@@ -159,6 +160,7 @@ def llm_answer(question: str, contexts: List[str]) -> str:
     )
     return extract_output_text(resp).strip()
 
+# Косинусное сходство
 def cosine(u: List[float], v: List[float]) -> float:
     """Косинусное сходство -> [0,1]."""
     import math
@@ -169,12 +171,14 @@ def cosine(u: List[float], v: List[float]) -> float:
         return 0.0
     return max(0.0, min(1.0, (s / (nu * nv) + 1.0) / 2.0))
 
+# Эмбеддинги
 def embed_texts(texts: List[str], *, model: str, client: OpenAI) -> List[List[float]]:
     """Эмбеддинги напрямую через OpenAI Embeddings API"""
     res = client.embeddings.create(model=model, 
                                    input=texts)
     return [d.embedding for d in res.data]
 
+# Метрики
 def compute_simple_answer_relevancy_from_df(df_texts: pd.DataFrame, *, model: str, client: OpenAI) -> List[float]:
     """Surrogate для answer_relevancy: cos_sim(emb(Q), emb(A)) из ИСХОДНОГО df с колонками question/answer."""
     questions = df_texts["question"].astype(str).tolist()
@@ -183,6 +187,7 @@ def compute_simple_answer_relevancy_from_df(df_texts: pd.DataFrame, *, model: st
     a_vecs = embed_texts(answers, model=model, client=client)
     return [cosine(q, a) for q, a in zip(q_vecs, a_vecs)]
 
+# Метрики
 def compute_answer_gt_similarity(df_texts: pd.DataFrame, *, model: str, client: OpenAI) -> List[float]:
     """Семантическая корректность ответа: cos_sim(emb(A), emb(GT)) в [0..1]."""
     answers = df_texts["answer"].astype(str).tolist()
@@ -236,7 +241,9 @@ def main() -> None:
     rag_mask = df["contexts"].apply(lambda xs: isinstance(xs, list) and len(xs) > 0)
     details_all = pd.DataFrame(index=df.index)
 
-    #  RAGAS (только там, где есть контекст)
+
+    # RAGAS (только там, где есть контекст)
+   
     if rag_mask.any():
         hf_ds = Dataset.from_pandas(df.loc[rag_mask, ["question", "answer", "contexts", "ground_truth"]])
         metrics = [Faithfulness(), ContextPrecision(), ContextRecall()]
@@ -274,7 +281,7 @@ def main() -> None:
             print("\n[FAIL] RAGAS evaluate() завершился ошибкой:", type(e).__name__, str(e))
             sys.exit(1)
 
-    #  AnswerRelevancy (fallback Q↔A) для всех строк
+    # AnswerRelevancy (fallback Q↔A) для всех строк
     ar_scores = compute_simple_answer_relevancy_from_df(df, model=RAGAS_EMBEDDING_MODEL, client=client)
     details_all["answer_relevancy"] = ar_scores
 
