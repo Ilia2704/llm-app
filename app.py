@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 import os, time
 from functools import lru_cache
@@ -56,7 +54,7 @@ class Ask(BaseModel):
     query: str
     k: int = 6
     max_tokens: int = 400
-    exp: str = "baseline"     # baseline | optimized
+    exp: str = "baseline"     
     qid: str = "q1"           # Идентификатор запроса для графиков
 
 # ---------- Simple cache ----------
