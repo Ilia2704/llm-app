@@ -7,7 +7,7 @@
 - Векторизует rusSBERT (ai-forever/sbert_large_nlu_ru, 1024, normalize=True)
 - Пересоздает коллекцию в Qdrant и загружает чанки батчами
 """
-
+    
 import argparse
 import re
 import sys
