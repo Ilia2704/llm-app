@@ -201,6 +201,7 @@ def compute_answer_gt_similarity(df_texts: pd.DataFrame, *, model: str, client: 
 def main() -> None:
     # Генерация ответов
     rows: List[Dict[str, Any]] = []
+    print(OPENAI_API_KEY)
     print("\n[1/3] Генерация ответов моделью...")
     log.info("Начало генерации: %d кейсов, модель=%s", len(SAMPLES), OPENAI_MODEL)
 
@@ -368,5 +369,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    print(OPENAI_API_KEY)
     main()
