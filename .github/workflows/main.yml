@@ -2,7 +2,9 @@ name: PR Quality Checks
 
 on:
   pull_request:
-    branches: ["**"]   
+    branches: ["**"] 
+  push:
+    branches: ["main", "master"]  
   workflow_dispatch:    
 
 jobs:
