@@ -71,7 +71,7 @@ OPENAI_MODEL=gpt-4o
 
 ```bash
 # RAGAS evaluation (exits with code 1 if thresholds fail)
-python run_ragas_demo.py
+python run_ragas_demo_test.py
 
 # or via pytest (if you added the sample test file)
 pytest -q

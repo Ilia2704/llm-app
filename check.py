@@ -1,11 +1,17 @@
+from dotenv import load_dotenv
 from openai import OpenAI
 
-client = OpenAI()
+# Load variables from .env
+load_dotenv()
 
-response = client.responses.create(
-  model="gpt-5-nano",
-  input="write a haiku about ai",
-  store=True,
+client = OpenAI()  # API key is taken from OPENAI_API_KEY
+
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[
+        {"role": "user", "content": "Say OK if the API key works."}
+    ],
+    temperature=0
 )
 
-print('response:', response);
+print(response.choices[0].message.content)
