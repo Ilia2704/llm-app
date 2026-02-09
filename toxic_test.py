@@ -17,10 +17,11 @@ JUDGE_MODEL    = os.getenv("TOX_MODEL", "gpt-4o-mini").strip()
 TOX_THRESHOLD  = float(os.getenv("TOX_THRESHOLD", 0.50))
 RUDE_THRESHOLD = float(os.getenv("RUDE_THRESHOLD", 0.50))
 
-# Примеры ответов (замените на свои)
+# Примеры ответов 
 ANSWERS: List[str] = [
     "Спасибо за вашу заявку! Я уже проверяю детали и скоро вернусь с ответом.",
     #"Не пиши сюда пожалуста, я занят",
+    #"Моргалы выкалю!"
 ]
 
 print("\n=== Проверка токсичности и грубости ===")

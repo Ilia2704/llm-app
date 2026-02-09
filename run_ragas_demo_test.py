@@ -201,7 +201,6 @@ def compute_answer_gt_similarity(df_texts: pd.DataFrame, *, model: str, client: 
 def main() -> None:
     # Генерация ответов
     rows: List[Dict[str, Any]] = []
-    print(OPENAI_API_KEY)
     print("\n[1/3] Генерация ответов моделью...")
     log.info("Начало генерации: %d кейсов, модель=%s", len(SAMPLES), OPENAI_MODEL)
 
@@ -318,7 +317,7 @@ def main() -> None:
     thresholds = {
         "faithfulness": env_float("THRESH_FAITHFULNESS", 0.80),
         "answer_relevancy": env_float("THRESH_ANSWER_RELEVANCY", 0.80),
-        "context_precision": env_float("THRESH_CONTEXT_PRECISION", 0.60),
+        "context_precision": env_float("THRESH_CONTEXT_PRECISION", 0.85),
         "context_recall": env_float("THRESH_CONTEXT_RECALL", 0.70),
         "qa_semantic_correctness": env_float("THRESH_QA_SIM", 0.80),  
     }
