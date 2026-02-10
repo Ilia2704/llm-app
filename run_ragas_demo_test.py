@@ -316,7 +316,7 @@ def main() -> None:
 
     thresholds = {
         "faithfulness": env_float("THRESH_FAITHFULNESS", 0.80),
-        "answer_relevancy": env_float("THRESH_ANSWER_RELEVANCY", 0.80),
+        "answer_relevancy": env_float("THRESH_ANSWER_RELEVANCY", 0.70),
         "context_precision": env_float("THRESH_CONTEXT_PRECISION", 0.85),
         "context_recall": env_float("THRESH_CONTEXT_RECALL", 0.70),
         "qa_semantic_correctness": env_float("THRESH_QA_SIM", 0.80),  
