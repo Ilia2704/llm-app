@@ -1,17 +1,16 @@
-from dotenv import load_dotenv
 from openai import OpenAI
+import os
 
-# Load variables from .env
-load_dotenv()
+YC_API_KEY = os.environ["YC_API_KEY"]
+YC_FOLDER_ID = os.environ["YC_FOLDER_ID"]
 
-client = OpenAI()  # API key is taken from OPENAI_API_KEY
-
-response = client.chat.completions.create(
-    model="gpt-4o-mini",
-    messages=[
-        {"role": "user", "content": "Say OK if the API key works."}
-    ],
-    temperature=0
+client = OpenAI(
+    base_url="https://llm.api.cloud.yandex.net/v1",
+    api_key="DUMMY",  # не используется, если переопределим заголовок
+    default_headers={
+        "Authorization": f"Api-Key {YC_API_KEY}",
+        "OpenAI-Project": YC_FOLDER_ID,   # важно для совместимости
+    },
 )
 
-print(response.choices[0].message.content)
+print(client.models.list())

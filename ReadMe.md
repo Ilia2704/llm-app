@@ -28,8 +28,8 @@ python3.12 --version
 ## 2) Create a virtual env & install deps
 
 ```bash
-python3.12 -m venv llm-venv
-source llm-venv/bin/activate        # Windows: .\llm-venv\Scripts\Activate.ps1
+python3.12 -m venv .venv
+source .venv/bin/activate        # Windows: .\llm-venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip setuptools wheel
 pip install -r requirements.txt
 ```

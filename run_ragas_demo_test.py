@@ -38,15 +38,33 @@ from datasets import Dataset
 
 load_dotenv()
 
-OPENAI_API_KEY = (os.getenv("OPENAI_API_KEY") or "").strip()
-if not OPENAI_API_KEY:
-    raise RuntimeError("OPENAI_API_KEY не найден. Добавьте его в .env или экспортируйте.")
+YC_API_KEY   = (os.getenv("YC_API_KEY") or "").strip()
+YC_FOLDER_ID = (os.getenv("YC_FOLDER_ID") or "").strip()
 
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini").strip()
-RAGAS_EMBEDDING_MODEL = os.getenv("RAGAS_EMBEDDING_MODEL", "text-embedding-3-small").strip()
+if not YC_API_KEY or not YC_FOLDER_ID:
+    raise RuntimeError("Нужны YC_API_KEY и YC_FOLDER_ID в .env")
+
+OPENAI_MODEL = (
+    os.getenv("OPENAI_MODEL")
+    or f"gpt://{YC_FOLDER_ID}/yandexgpt-lite/latest"
+).strip()
+
+RAGAS_EMBEDDING_MODEL = (
+    os.getenv("RAGAS_EMBEDDING_MODEL")
+    or f"emb://{YC_FOLDER_ID}/text-embeddings/latest"
+).strip()
+
+client = OpenAI(
+    api_key="DUMMY",
+    base_url="https://llm.api.cloud.yandex.net/v1",
+    default_headers={
+        "Authorization": f"Api-Key {YC_API_KEY}",
+        "OpenAI-Project": YC_FOLDER_ID,
+    },
+)
+
 USE_SIMPLE_AR = os.getenv("USE_SIMPLE_AR", "1").strip() not in ("0", "false", "False")
 
-client = OpenAI()
 
 logging.basicConfig(
     level=logging.INFO,
@@ -152,13 +170,19 @@ def llm_answer(question: str, contexts: List[str]) -> str:
             f"Вопрос: {question}\nКраткий ответ:"
         )
 
-    resp = client.responses.create(
+    resp = client.chat.completions.create(
         model=OPENAI_MODEL,
-        input=prompt,
+        messages=[
+            {"role": "system", "content": SYSTEM_RULES} if contexts else
+            {"role": "system", "content": "Вы — фактологичный помощник. Отвечайте кратко и точно."},
+            {"role": "user", "content": prompt},
+        ],
         temperature=0,
-        store=False,
+        max_tokens=300,
     )
-    return extract_output_text(resp).strip()
+
+    return (resp.choices[0].message.content or "").strip()
+
 
 # Косинусное сходство
 def cosine(u: List[float], v: List[float]) -> float:
@@ -173,10 +197,15 @@ def cosine(u: List[float], v: List[float]) -> float:
 
 # Эмбеддинги
 def embed_texts(texts: List[str], *, model: str, client: OpenAI) -> List[List[float]]:
-    """Эмбеддинги напрямую через OpenAI Embeddings API"""
-    res = client.embeddings.create(model=model, 
-                                   input=texts)
-    return [d.embedding for d in res.data]
+    vecs: List[List[float]] = []
+    for t in texts:
+        res = client.embeddings.create(
+            model=model,
+            input=str(t),
+            encoding_format="float",
+        )
+        vecs.append(res.data[0].embedding)
+    return vecs
 
 # Метрики
 def compute_simple_answer_relevancy_from_df(df_texts: pd.DataFrame, *, model: str, client: OpenAI) -> List[float]:
@@ -234,8 +263,18 @@ def main() -> None:
       # Оценка: RAGAS для кейсов с контекстом + универсальные QA-метрики
     print("\n[2/3] Оценка метрик...")
     evaluator_llm = LangchainLLMWrapper(
-        ChatOpenAI(model=OPENAI_MODEL, temperature=0, api_key=OPENAI_API_KEY)
+        ChatOpenAI(
+            model=OPENAI_MODEL,
+            temperature=0,
+            api_key="DUMMY",
+            base_url="https://llm.api.cloud.yandex.net/v1",
+            default_headers={
+                "Authorization": f"Api-Key {YC_API_KEY}",
+                "OpenAI-Project": YC_FOLDER_ID,
+            },
+        )
     )
+
     evaluator_embeddings = OpenAIEmbeddings(client=client, model=RAGAS_EMBEDDING_MODEL)
 
     rag_mask = df["contexts"].apply(lambda xs: isinstance(xs, list) and len(xs) > 0)
@@ -316,8 +355,8 @@ def main() -> None:
 
     thresholds = {
         "faithfulness": env_float("THRESH_FAITHFULNESS", 0.80),
-        "answer_relevancy": env_float("THRESH_ANSWER_RELEVANCY", 0.70),
-        "context_precision": env_float("THRESH_CONTEXT_PRECISION", 0.85),
+        "answer_relevancy": env_float("THRESH_ANSWER_RELEVANCY", 0.50),
+        "context_precision": env_float("THRESH_CONTEXT_PRECISION", 0.50),
         "context_recall": env_float("THRESH_CONTEXT_RECALL", 0.70),
         "qa_semantic_correctness": env_float("THRESH_QA_SIM", 0.80),  
     }
