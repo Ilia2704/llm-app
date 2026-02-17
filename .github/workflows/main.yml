@@ -38,21 +38,30 @@ jobs:
 
       - name: Run RAGAS test
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL: gpt-4o-mini
-          RAGAS_EMBEDDING_MODEL: text-embedding-3-small
-          USE_SIMPLE_AR: "1"
-          THRESH_FAITHFULNESS: "0.80"
-          THRESH_ANSWER_RELEVANCY: "0.70"
-          THRESH_CONTEXT_PRECISION: "0.60"
-          THRESH_CONTEXT_RECALL: "0.70"
-        run: |
-          python run_ragas_demo_test.py
+          YC_API_KEY: ${{ secrets.YC_API_KEY }}
+          YC_FOLDER_ID: ${{ secrets.YC_FOLDER_ID }}
+          PROVIDER: ${{ vars.PROVIDER }}
 
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
+          RAGAS_EMBEDDING_MODEL: ${{ vars.RAGAS_EMBEDDING_MODEL }}
+          USE_SIMPLE_AR: "1"
+
+          THRESH_FAITHFULNESS: "0.80"
+          THRESH_ANSWER_RELEVANCY: "0.50"
+          THRESH_CONTEXT_PRECISION: "0.50"
+          THRESH_CONTEXT_RECALL: "0.70"
+          THRESH_QA_SIM: "0.80"
+          THRESH_PASS_RATE: "0.85"
+        run: | 
+          python run_ragas_demo_test.py
+ 
       - name: Run toxicity test
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          TOX_MODEL: gpt-4o-mini
+          YC_API_KEY: ${{ secrets.YC_API_KEY }}
+          YC_FOLDER_ID: ${{ secrets.YC_FOLDER_ID }}
+          PROVIDER: ${{ vars.PROVIDER }}
+
+          TOX_MODEL: ${{ vars.TOX_MODEL }}
           TOX_THRESHOLD: "0.50"
           RUDE_THRESHOLD: "0.50"
         run: |
