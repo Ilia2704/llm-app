@@ -16,26 +16,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Python 3.12
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: ${{ runner.os }}-pip-
-
-      - name: Install deps
-        run: |
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
-          else
-            pip install -U openai ragas datasets langchain-openai python-dotenv tqdm pandas
-          fi
-
       - name: Run RAGAS test
         env:
           YC_API_KEY: ${{ secrets.YC_API_KEY }}
@@ -53,7 +33,7 @@ jobs:
           THRESH_QA_SIM: "0.80"
           THRESH_PASS_RATE: "0.85"
         run: | 
-          python run_ragas_demo_test.py
+          python3 run_ragas_demo_test.py
  
       - name: Run toxicity test
         env:
@@ -66,7 +46,7 @@ jobs:
           RUDE_THRESHOLD: "0.50"
         run: |
           set -e
-          python toxic_test.py | tee tox.out
+          python3 toxic_test.py | tee tox.out
           if grep -E -q "ГЕЙТ:\s*ПРОВАЛ" tox.out; then
             echo "::error::Toxicity gate failed"
             exit 1
