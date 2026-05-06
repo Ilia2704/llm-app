@@ -16,11 +16,12 @@ pydantic==2.9.2
 qdrant-client==1.12.2
 
 # ===== Embeddings / Retrieval / Reranking =====
-sentence-transformers==3.0.1
-torch==2.3.1
+sentence-transformers==5.4.1
+torch==2.10.0
 scikit-learn==1.5.2
-transformers==4.44.2
-accelerate==0.33.0
+transformers==5.5.4
+accelerate==1.12.0
+huggingface-hub==1.5.0
 
 # ===== LangChain / LangGraph =====
 langchain==0.3.8
@@ -31,12 +32,11 @@ langchain-openai==0.3.3
 openai==1.107.3
 
 # ===== RAG evaluation =====
-ragas==0.3.4
+ragas==0.4.3
 datasets==4.0.0
 evaluate==0.4.2
 
 # ===== Monitoring =====
-prometheus-client==0.20.0
 prometheus-fastapi-instrumentator==6.1.0
 
 # ===== Document parsing (txt/pdf/docx) =====
@@ -44,8 +44,10 @@ pymupdf==1.24.9
 python-docx==1.1.2
 PyYAML==6.0.2
 
-# ===== MLflow (tracking + artifacts) =====
-mlflow==2.14.1
+# ===== Observability / Tracing =====
+mlflow==3.10.1
+langfuse==4.3.1
+langsmith==0.1.147
 
 # ===== Graph visualization & NER =====
 networkx==3.2.1
@@ -53,4 +55,16 @@ graphviz==0.21
 pydot==4.0.1
 matplotlib==3.9.4
 natasha==1.6.0
-razdel==0.5.0     
+razdel==0.5.0
+
+# ===== Notebook / local workshop helpers =====
+ipykernel==7.2.0
+ipywidgets==8.1.8
+jupyterlab==4.5.6
+tabulate==0.9.0
+
+# ===== Local LLM notebook (macOS Apple Silicon / M2) =====
+cmake==4.3.1; sys_platform == "darwin" and platform_machine == "arm64"
+mlx==0.31.1; sys_platform == "darwin" and platform_machine == "arm64"
+mlx-lm==0.31.2; sys_platform == "darwin" and platform_machine == "arm64"
+llama-cpp-python==0.3.9; sys_platform == "darwin" and platform_machine == "arm64"
