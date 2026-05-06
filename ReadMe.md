@@ -50,13 +50,23 @@ pyarrow==17.0.0
 
 ---
 
-## 3) Add your OpenAI key
+## 3) Add your YC key
 
 Create `.env` in the project root:
 
 ```dotenv
-OPENAI_API_KEY=sk-YOUR_KEY_HERE
-OPENAI_MODEL=gpt-4o
+export YC_API_KEY=""
+export YC_FOLDER_ID=""
+export PROVIDER=""
+
+export TOX_MODEL="gpt://_/yandexgpt/latest"
+export TOX_THRESHOLD="0.50"
+export RUDE_THRESHOLD="0.50"
+
+export OPENAI_MODEL="gpt://__/yandexgpt-lite/latest"
+export RAGAS_EMBEDDING_MODEL="emb://__/text-embeddings/latest"
+
+
 ```
 
 > If the file came from Windows, normalize line endings:
