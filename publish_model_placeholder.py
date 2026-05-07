@@ -34,8 +34,11 @@ def main() -> None:
         placeholder = tmp_path / f"{safe_name}.txt"
         placeholder.write_text(model_name + "\n", encoding="utf-8")
 
-        print(f"[UPLOAD] Модель прошла проверку: {model_name}")
-        print(f"[UPLOAD] Загружаю заглушку в MinIO: s3://{bucket}/{object_prefix}/{placeholder.name}")
+        print(f"[UPLOAD] Модель прошла проверку: {model_name}", flush=True)
+        print(
+            f"[UPLOAD] Загружаю заглушку в MinIO: s3://{bucket}/{object_prefix}/{placeholder.name}",
+            flush=True,
+        )
 
         subprocess.run(
             [
@@ -44,10 +47,11 @@ def main() -> None:
                 "--rm",
                 "--network",
                 docker_network,
+                "--entrypoint",
+                "/bin/sh",
                 "-v",
                 f"{tmp_path}:/artifacts",
                 "minio/mc:latest",
-                "/bin/sh",
                 "-lc",
                 (
                     f"mc alias set local {minio_endpoint} {minio_user} {minio_password} >/dev/null && "
@@ -58,7 +62,7 @@ def main() -> None:
             check=True,
         )
 
-        print(f"[UPLOAD] Готово: {placeholder.name}")
+        print(f"[UPLOAD] Готово: {placeholder.name}", flush=True)
 
 
 if __name__ == "__main__":
