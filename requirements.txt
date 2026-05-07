@@ -47,7 +47,6 @@ PyYAML==6.0.2
 # ===== Observability / Tracing =====
 mlflow==3.10.1
 langfuse==4.3.1
-langsmith==0.1.147
 
 # ===== Graph visualization & NER =====
 networkx==3.2.1

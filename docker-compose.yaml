@@ -16,11 +16,14 @@ services:
         "5000",
         "--backend-store-uri",
         "sqlite:////mlflow/mlflow.db",
-        "--default-artifact-root",
+        "--serve-artifacts",
+        "--artifacts-destination",
         "/mlflow/artifacts",
+        "--default-artifact-root",
+        "mlflow-artifacts:/",
       ]
     ports:
-      - "5000:5000"
+      - "5001:5000"
     volumes:
       - mlflow_data:/mlflow
     healthcheck:
@@ -108,7 +111,7 @@ services:
     volumes:
       - langfuse_minio_data:/data
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:9000/minio/health/live || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:9000/minio/health/live >/dev/null || exit 1"]
       interval: 5s
       timeout: 5s
       retries: 12
@@ -123,10 +126,9 @@ services:
     depends_on:
       langfuse-minio:
         condition: service_healthy
+    entrypoint: ["/bin/sh", "-lc"]
     command:
       [
-        "/bin/sh",
-        "-c",
         "mc alias set local http://langfuse-minio:9000 ${LANGFUSE_MINIO_ROOT_USER:-minio} ${LANGFUSE_MINIO_ROOT_PASSWORD:-miniosecret} && mc mb --ignore-existing local/${LANGFUSE_S3_BUCKET:-langfuse}",
       ]
     restart: "no"
