@@ -15,11 +15,11 @@
 ## Что проверяется
 
 Для каждого прогона `RAGAS` считаются:
-- `faithfulness`
-- `answer_relevancy`
-- `context_precision`
-- `context_recall`
-- `qa_semantic_correctness`
+- "faithfulness"
+- "answer_relevancy"
+- "context_precision"
+- "context_recall"
+- "qa_semantic_correctness"
 
 Результаты пишутся:
 - в `MLflow`
