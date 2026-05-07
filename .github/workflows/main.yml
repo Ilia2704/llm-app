@@ -8,15 +8,23 @@ on:
   workflow_dispatch:    
 
 jobs:
-  tests:
+  model-tests:
     runs-on: self-hosted
     timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        model_name:
+          - ollama-qwen3-0.6b-q8
+          - ollama-qwen3-4b-q4
+          - ollama-qwen3-8b-q4
+          - yandexgpt-lite
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Run pre-deploy model tests
+      - name: Run pre-deploy test for ${{ matrix.model_name }}
         env:
           YC_API_KEY: ${{ secrets.YC_API_KEY }}
           YC_FOLDER_ID: ${{ secrets.YC_FOLDER_ID }}
@@ -26,6 +34,7 @@ jobs:
           RAGAS_EMBEDDING_MODEL: ${{ vars.RAGAS_EMBEDDING_MODEL }}
           OLLAMA_BASE_URL: "http://localhost:11434/v1"
           OLLAMA_API_KEY: "ollama"
+          PREDEPLOY_MODEL_NAME: ${{ matrix.model_name }}
           USE_SIMPLE_AR: "1"
 
           THRESH_FAITHFULNESS: "0.80"
@@ -36,7 +45,22 @@ jobs:
           THRESH_PASS_RATE: "0.85"
         run: | 
           python3 pre_deploy_test.py
- 
+
+      - name: Upload passed model placeholder to MinIO
+        if: success()
+        env:
+          MODEL_NAME: ${{ matrix.model_name }}
+        run: |
+          python3 publish_model_placeholder.py
+
+  toxicity-test:
+    runs-on: self-hosted
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Run toxicity test
         env:
           YC_API_KEY: ${{ secrets.YC_API_KEY }}

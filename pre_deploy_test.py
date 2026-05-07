@@ -50,6 +50,18 @@ MODEL_RUNS = [
 ]
 
 
+def get_model_runs() -> list[dict[str, str]]:
+    selected_name = (os.getenv("PREDEPLOY_MODEL_NAME") or "").strip()
+    if not selected_name:
+        return MODEL_RUNS
+
+    for model_cfg in MODEL_RUNS:
+        if model_cfg["name"] == selected_name:
+            return [model_cfg]
+
+    raise RuntimeError(f"Неизвестная модель для pre-deploy теста: {selected_name}")
+
+
 def _log_artifact_text(text: str, path: Path) -> None:
     path.write_text(text, encoding="utf-8")
     mlflow.log_artifact(str(path))
@@ -240,7 +252,13 @@ def run_model_test(model_cfg: dict[str, str]) -> bool:
 
 
 def main() -> None:
-    if not MODEL_RUNS[-1]["model"]:
+    model_runs = get_model_runs()
+
+    for model_cfg in model_runs:
+        if model_cfg["provider"] == "yandex" and not model_cfg["model"]:
+            raise RuntimeError("Для модели Yandex нужно заполнить OPENAI_MODEL в .env.")
+
+    if not MODEL_RUNS[-1]["model"] and any(m["provider"] == "yandex" for m in model_runs):
         raise RuntimeError("Для модели Yandex нужно заполнить OPENAI_MODEL в .env.")
 
     mlflow.set_tracking_uri((os.getenv("MLFLOW_TRACKING_URI") or "http://localhost:5001").strip())
@@ -253,14 +271,14 @@ def main() -> None:
     try:
         with mlflow.start_run(run_name="pre_deploy_test"):
             mlflow.set_tags({"suite": "pre_deploy_test"})
-            for model_cfg in MODEL_RUNS:
+            for model_cfg in model_runs:
                 ok = run_model_test(model_cfg)
                 if ok:
                     passed.append(model_cfg["name"])
                 else:
                     failed.append(model_cfg["name"])
 
-            mlflow.log_param("model_count", len(MODEL_RUNS))
+            mlflow.log_param("model_count", len(model_runs))
             mlflow.log_param("passed_models", ",".join(passed))
             mlflow.log_param("failed_models", ",".join(failed))
             mlflow.log_metric("passed_model_count", float(len(passed)))
